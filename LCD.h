@@ -397,7 +397,7 @@ public:
     @abstract   Sets the pin to control the backlight.
     @discussion Sets the pin in the device to control the backlight.
     This method is device dependent and can be programmed on each subclass. An 
-    empty function call is providedthat does nothing.
+    empty function call is provided that does nothing.
     
     @param      mode: backlight mode (HIGH|LOW)
     */
