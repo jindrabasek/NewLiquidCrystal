@@ -48,7 +48,7 @@ LiquidCrystal_I2C_ByVac::LiquidCrystal_I2C_ByVac( uint8_t lcd_Addr )
 // begin
 void LiquidCrystal_I2C_ByVac::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) 
 {
-   Wire.begin();
+   //Wire.begin();
    LCD::begin ( cols, lines, dotsize );   
 }
 

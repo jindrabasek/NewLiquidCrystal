@@ -130,7 +130,7 @@ uint8_t I2CIO::read ( void )
 #else
       retVal = ( _dirMask & Wire.read ( ) );
 #endif      
-      
+      Wire.endTransmission();
    }
    return ( retVal );
 }
