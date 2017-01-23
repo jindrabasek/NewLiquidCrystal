@@ -42,8 +42,12 @@
 #include <Arduino.h>
 #endif
 
+#include <StackTrace.h>
+
 //extern "C" void __cxa_pure_virtual() { while (1); }
 #include "LCD.h"
+
+#define FILE_ID 1
 
 
 // CLASS CONSTRUCTORS
@@ -78,6 +82,7 @@ LCD::LCD ()
 //
 void LCD::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) 
 {
+   PUSH_STACK(FILE_ID);
    if (lines > 1) 
    {
       _displayfunction |= LCD_2LINE;
@@ -106,22 +111,30 @@ void LCD::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
       // this is according to the hitachi HD44780 datasheet
       // figure 24, pg 46
       
+      PUSH_STACK(FILE_ID);
       // we start in 8bit mode, try to set 4 bit mode
       // Special case of "Function Set"
       send(0x03, FOUR_BITS);
       delayMicroseconds(4500); // wait min 4.1ms
+      POP_STACK;
       
+      PUSH_STACK(FILE_ID);
       // second try
       send ( 0x03, FOUR_BITS );
       delayMicroseconds(150); // wait min 100us
+      POP_STACK;
       
+      PUSH_STACK(FILE_ID);
       // third go!
       send( 0x03, FOUR_BITS );
       delayMicroseconds(150); // wait min of 100us
+      POP_STACK;
       
+      PUSH_STACK(FILE_ID);
       // finally, set to 4-bit interface
       send ( 0x02, FOUR_BITS );
       delayMicroseconds(150); // wait min of 100us
+      POP_STACK;
 
    } 
    else 
@@ -129,23 +142,31 @@ void LCD::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
       // this is according to the hitachi HD44780 datasheet
       // page 45 figure 23
       
+      PUSH_STACK(FILE_ID);
       // Send function set command sequence
       command(LCD_FUNCTIONSET | _displayfunction);
       delayMicroseconds(4500);  // wait more than 4.1ms
+      POP_STACK;
       
+      PUSH_STACK(FILE_ID);
       // second try
       command(LCD_FUNCTIONSET | _displayfunction);
       delayMicroseconds(150);
+      POP_STACK;
       
+      PUSH_STACK(FILE_ID);
       // third go
       command(LCD_FUNCTIONSET | _displayfunction);
       delayMicroseconds(150);
+      POP_STACK;
 
    }
    
+   PUSH_STACK(FILE_ID);
    // finally, set # lines, font size, etc.
    command(LCD_FUNCTIONSET | _displayfunction);
    delayMicroseconds ( 60 );  // wait more
+   POP_STACK;
    
    // turn the display on with no cursor or blinking default
    _displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;  
@@ -154,31 +175,39 @@ void LCD::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
    // clear the LCD
    clear();
    
+   PUSH_STACK(FILE_ID);
    // Initialize to default text direction (for romance languages)
    _displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
    // set the entry mode
    command(LCD_ENTRYMODESET | _displaymode);
+   POP_STACK;
 
    backlight();
 
+   POP_STACK;
 }
 
 // Common LCD Commands
 // ---------------------------------------------------------------------------
 void LCD::clear()
 {
+   PUSH_STACK(FILE_ID);
    command(LCD_CLEARDISPLAY);             // clear display, set cursor position to zero
    delayMicroseconds(HOME_CLEAR_EXEC);    // this command is time consuming
+   POP_STACK;
 }
 
 void LCD::home()
 {
+   PUSH_STACK(FILE_ID);
    command(LCD_RETURNHOME);             // set cursor position to zero
    delayMicroseconds(HOME_CLEAR_EXEC);  // This command is time consuming
+   POP_STACK;
 }
 
 void LCD::setCursor(uint8_t col, uint8_t row)
 {
+   PUSH_STACK(FILE_ID);
    const byte row_offsetsDef[]   = { 0x00, 0x40, 0x14, 0x54 }; // For regular LCDs
    const byte row_offsetsLarge[] = { 0x00, 0x40, 0x10, 0x50 }; // For 16x4 LCDs
    
@@ -191,133 +220,173 @@ void LCD::setCursor(uint8_t col, uint8_t row)
    // ----------------------------------------
    if ( _cols == 16 && _numlines == 4 )
    {
+      PUSH_STACK(FILE_ID);
       command(LCD_SETDDRAMADDR | (col + row_offsetsLarge[row]));
+      POP_STACK;
    }
    else 
    {
+      PUSH_STACK(FILE_ID);
       command(LCD_SETDDRAMADDR | (col + row_offsetsDef[row]));
+      POP_STACK;
    }
-   
+   POP_STACK;
 }
 
 // Turn the display on/off
 void LCD::noDisplay() 
 {
+   PUSH_STACK(FILE_ID);
    _displaycontrol &= ~LCD_DISPLAYON;
    command(LCD_DISPLAYCONTROL | _displaycontrol);
+   POP_STACK;
 }
 
 void LCD::display() 
 {
+   PUSH_STACK(FILE_ID);
    _displaycontrol |= LCD_DISPLAYON;
    command(LCD_DISPLAYCONTROL | _displaycontrol);
+   POP_STACK;
 }
 
 // Turns the underline cursor on/off
 void LCD::noCursor() 
 {
+   PUSH_STACK(FILE_ID);
    _displaycontrol &= ~LCD_CURSORON;
    command(LCD_DISPLAYCONTROL | _displaycontrol);
+   POP_STACK;
 }
 void LCD::cursor() 
 {
+   PUSH_STACK(FILE_ID);
    _displaycontrol |= LCD_CURSORON;
    command(LCD_DISPLAYCONTROL | _displaycontrol);
+   POP_STACK;
 }
 
 // Turns on/off the blinking cursor
 void LCD::noBlink() 
 {
+   PUSH_STACK(FILE_ID);
    _displaycontrol &= ~LCD_BLINKON;
    command(LCD_DISPLAYCONTROL | _displaycontrol);
+   POP_STACK;
 }
 
 void LCD::blink() 
 {
+   PUSH_STACK(FILE_ID);
    _displaycontrol |= LCD_BLINKON;
    command(LCD_DISPLAYCONTROL | _displaycontrol);
+   POP_STACK;
 }
 
 // These commands scroll the display without changing the RAM
 void LCD::scrollDisplayLeft(void) 
 {
+   PUSH_STACK(FILE_ID);
    command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVELEFT);
+   POP_STACK;
 }
 
 void LCD::scrollDisplayRight(void) 
 {
+   PUSH_STACK(FILE_ID);
    command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVERIGHT);
+   POP_STACK;
 }
 
 // This is for text that flows Left to Right
 void LCD::leftToRight(void) 
 {
+   PUSH_STACK(FILE_ID);
    _displaymode |= LCD_ENTRYLEFT;
    command(LCD_ENTRYMODESET | _displaymode);
+   POP_STACK;
 }
 
 // This is for text that flows Right to Left
 void LCD::rightToLeft(void) 
 {
+   PUSH_STACK(FILE_ID);
    _displaymode &= ~LCD_ENTRYLEFT;
    command(LCD_ENTRYMODESET | _displaymode);
+   POP_STACK;
 }
 
 // This method moves the cursor one space to the right
 void LCD::moveCursorRight(void)
 {
+   PUSH_STACK(FILE_ID);
    command(LCD_CURSORSHIFT | LCD_CURSORMOVE | LCD_MOVERIGHT);
+   POP_STACK;
 }
 
 // This method moves the cursor one space to the left
 void LCD::moveCursorLeft(void)
 {
+   PUSH_STACK(FILE_ID);
    command(LCD_CURSORSHIFT | LCD_CURSORMOVE | LCD_MOVELEFT);
+   POP_STACK;
 }
 
 
 // This will 'right justify' text from the cursor
 void LCD::autoscroll(void) 
 {
+   PUSH_STACK(FILE_ID);
    _displaymode |= LCD_ENTRYSHIFTINCREMENT;
    command(LCD_ENTRYMODESET | _displaymode);
+   POP_STACK;
 }
 
 // This will 'left justify' text from the cursor
 void LCD::noAutoscroll(void) 
 {
+   PUSH_STACK(FILE_ID);
    _displaymode &= ~LCD_ENTRYSHIFTINCREMENT;
    command(LCD_ENTRYMODESET | _displaymode);
+   POP_STACK;
 }
 
 // Write to CGRAM of new characters
 void LCD::createChar(uint8_t location, uint8_t charmap[]) 
 {
+   PUSH_STACK(FILE_ID);
    location &= 0x7;            // we only have 8 locations 0-7
    
    command(LCD_SETCGRAMADDR | (location << 3));
    delayMicroseconds(30);
    
+   PUSH_STACK(FILE_ID);
    for (uint8_t i = 0; i < 8; i++)
    {
       write(charmap[i]);      // call the virtual write method
       delayMicroseconds(40);
    }
+   POP_STACK;
+   POP_STACK;
 }
 
 #ifdef __AVR__
 void LCD::createChar(uint8_t location, const char *charmap)
 {
+   PUSH_STACK(FILE_ID);
    location &= 0x7;   // we only have 8 memory locations 0-7
    
    command(LCD_SETCGRAMADDR | (location << 3));
    delayMicroseconds(30);
    
+   PUSH_STACK(FILE_ID);
    for (uint8_t i = 0; i < 8; i++)
    {
       write(pgm_read_byte_near(charmap++));
       delayMicroseconds(40);
    }
+   POP_STACK;
+   POP_STACK;
 }
 #endif // __AVR__
 
@@ -325,37 +394,47 @@ void LCD::createChar(uint8_t location, const char *charmap)
 // Switch on the backlight
 void LCD::backlight ( void )
 {
+   PUSH_STACK(FILE_ID);
    setBacklight(255);
+   POP_STACK;
 }
 
 //
 // Switch off the backlight
 void LCD::noBacklight ( void )
 {
+   PUSH_STACK(FILE_ID);
    setBacklight(0);
+   POP_STACK;
 }
 
 //
 // Switch fully on the LCD (backlight and LCD)
 void LCD::on ( void )
 {
+   PUSH_STACK(FILE_ID);
    display();
    backlight();
+   POP_STACK;
 }
 
 //
 // Switch fully off the LCD (backlight and LCD) 
 void LCD::off ( void )
 {
+   PUSH_STACK(FILE_ID);
    noBacklight();
    noDisplay();
+   POP_STACK;
 }
 
 // General LCD commands - generic methods used by the rest of the commands
 // ---------------------------------------------------------------------------
 void LCD::command(uint8_t value) 
 {
+   PUSH_STACK(FILE_ID);
    send(value, COMMAND);
+   POP_STACK;
 }
 
 #if (ARDUINO <  100)
@@ -366,7 +445,6 @@ void LCD::write(uint8_t value)
 #else
 size_t LCD::write(uint8_t value) 
 {
-   send(value, DATA);
-   return 1;             // assume OK
+   return send(value, DATA);
 }
 #endif

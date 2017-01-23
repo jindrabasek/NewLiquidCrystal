@@ -191,7 +191,7 @@ uint8_t LiquidCrystal_SR1W::loadSR(uint8_t val)
 /************ low level data pushing commands **********/
 //
 // send
-void LiquidCrystal_SR1W::send(uint8_t value, uint8_t mode)
+bool LiquidCrystal_SR1W::send(uint8_t value, uint8_t mode)
 {
 	uint8_t numDelays = 0;
    
@@ -228,6 +228,8 @@ void LiquidCrystal_SR1W::send(uint8_t value, uint8_t mode)
 	unsigned int totalDelay = numDelays * SR1W_DELAY_US;
 	if (totalDelay < 40)
 		delayMicroseconds(40 - totalDelay);
+
+	return true;
 }
 
 //

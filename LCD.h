@@ -568,9 +568,9 @@ private:
     the LCD.
     */
 #if (ARDUINO <  100)
-   virtual void send(uint8_t value, uint8_t mode) { };
+   virtual bool send(uint8_t value, uint8_t mode) { };
 #else
-   virtual void send(uint8_t value, uint8_t mode) = 0;
+   virtual bool send(uint8_t value, uint8_t mode) = 0;
 #endif
    
 };

@@ -87,7 +87,7 @@ void LiquidCrystal_SR2W::loadSR(uint8_t val)
 /************ low level data pushing commands **********/
 //
 // send
-void LiquidCrystal_SR2W::send(uint8_t value, uint8_t mode)
+bool LiquidCrystal_SR2W::send(uint8_t value, uint8_t mode)
 {
 	uint8_t myMode = ( mode == DATA ) ? SR2W_RS_MASK : 0; 
    
@@ -110,6 +110,8 @@ void LiquidCrystal_SR2W::send(uint8_t value, uint8_t mode)
 #else
 	delayMicroseconds ( 37 );      // commands & data writes need > 37us to complete
 #endif
+
+	return true;
 }
 
 //

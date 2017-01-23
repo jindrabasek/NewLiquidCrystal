@@ -36,6 +36,11 @@
 #include "I2CIO.h"
 #include "LiquidCrystal_I2C.h"
 
+#include <StackTrace.h>
+
+#define FILE_ID 2
+
+
 // CONSTANT  definitions
 // ---------------------------------------------------------------------------
 
@@ -143,9 +148,8 @@ LiquidCrystal_I2C::LiquidCrystal_I2C(uint8_t lcd_Addr, uint8_t En, uint8_t Rw,
 // begin
 void LiquidCrystal_I2C::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) 
 {
-   
    init();     // Initialise the I2C expander interface
-   LCD::begin ( cols, lines, dotsize );   
+   LCD::begin ( cols, lines, dotsize );
 }
 
 
@@ -157,15 +161,18 @@ void LiquidCrystal_I2C::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
 // setBacklightPin
 void LiquidCrystal_I2C::setBacklightPin ( uint8_t value, t_backlighPol pol = POSITIVE )
 {
+   PUSH_STACK(FILE_ID);
    _backlightPinMask = ( 1 << value );
    _polarity = pol;
    setBacklight(BACKLIGHT_OFF);
+   POP_STACK;
 }
 
 //
 // setBacklight
 void LiquidCrystal_I2C::setBacklight( uint8_t value ) 
 {
+   PUSH_STACK(FILE_ID);
    // Check if backlight is available
    // ----------------------------------------------------
    if ( _backlightPinMask != 0x0 )
@@ -183,6 +190,7 @@ void LiquidCrystal_I2C::setBacklight( uint8_t value )
       }
       _i2cio.write( _backlightStsMask );
    }
+   POP_STACK;
 }
 
 
@@ -193,6 +201,7 @@ void LiquidCrystal_I2C::setBacklight( uint8_t value )
 // init
 int LiquidCrystal_I2C::init()
 {
+   PUSH_STACK(FILE_ID);
    int status = 0;
    
    // initialize the backpack IO expander
@@ -205,6 +214,7 @@ int LiquidCrystal_I2C::init()
       status = 1;
       _i2cio.write(0);  // Set the entire port to LOW
    }
+   POP_STACK;
    return ( status );
 }
 
@@ -213,6 +223,7 @@ int LiquidCrystal_I2C::init()
 void LiquidCrystal_I2C::config (uint8_t lcd_Addr, uint8_t En, uint8_t Rw, uint8_t Rs, 
                                 uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7 )
 {
+   PUSH_STACK(FILE_ID);
    _Addr = lcd_Addr;
    
    _backlightPinMask = 0;
@@ -228,6 +239,7 @@ void LiquidCrystal_I2C::config (uint8_t lcd_Addr, uint8_t En, uint8_t Rw, uint8_
    _data_pins[1] = ( 1 << d5 );
    _data_pins[2] = ( 1 << d6 );
    _data_pins[3] = ( 1 << d7 );   
+   POP_STACK;
 }
 
 
@@ -237,27 +249,39 @@ void LiquidCrystal_I2C::config (uint8_t lcd_Addr, uint8_t En, uint8_t Rw, uint8_
 
 //
 // send - write either command or data
-void LiquidCrystal_I2C::send(uint8_t value, uint8_t mode) 
+bool LiquidCrystal_I2C::send(uint8_t value, uint8_t mode)
 {
+   PUSH_STACK(FILE_ID);
    // No need to use the delay routines since the time taken to write takes
    // longer that what is needed both for toggling and enable pin an to execute
    // the command.
    
+   bool result = true;
+
    if ( mode == FOUR_BITS )
    {
-      write4bits( (value & 0x0F), COMMAND );
+      PUSH_STACK(FILE_ID);
+      result = write4bits( (value & 0x0F), COMMAND );
+      POP_STACK;
    }
    else 
    {
-      write4bits( (value >> 4), mode );
-      write4bits( (value & 0x0F), mode);
+      PUSH_STACK(FILE_ID);
+      result = write4bits((value >> 4), mode);
+      POP_STACK;
+      PUSH_STACK(FILE_ID);
+      result &= write4bits((value & 0x0F), mode);
+      POP_STACK;
    }
+   POP_STACK;
+   return result;
 }
 
 //
 // write4bits
-void LiquidCrystal_I2C::write4bits ( uint8_t value, uint8_t mode ) 
+bool LiquidCrystal_I2C::write4bits ( uint8_t value, uint8_t mode )
 {
+   PUSH_STACK(FILE_ID);
    uint8_t pinMapValue = 0;
    
    // Map the value to LCD pin mapping
@@ -279,13 +303,22 @@ void LiquidCrystal_I2C::write4bits ( uint8_t value, uint8_t mode )
    }
    
    pinMapValue |= mode | _backlightStsMask;
-   pulseEnable ( pinMapValue );
+   bool result = pulseEnable ( pinMapValue );
+   POP_STACK;
+   return result;
 }
 
 //
 // pulseEnable
-void LiquidCrystal_I2C::pulseEnable (uint8_t data)
+bool LiquidCrystal_I2C::pulseEnable (uint8_t data)
 {
-   _i2cio.write (data | _En);   // En HIGH
-   _i2cio.write (data & ~_En);  // En LOW
+   PUSH_STACK(FILE_ID);
+   bool result = _i2cio.write (data | _En);   // En HIGH
+   if (result) {
+       PUSH_STACK(FILE_ID);
+       result &= _i2cio.write (data & ~_En);  // En LOW
+       POP_STACK;
+   }
+   POP_STACK;
+   return result;
 }

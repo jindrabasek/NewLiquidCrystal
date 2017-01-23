@@ -130,7 +130,7 @@ public:
     @param      mode[in] DATA - write to the LCD CGRAM, COMMAND - write a 
     command to the LCD.
     */
-   virtual void send(uint8_t value, uint8_t mode);
+   virtual bool send(uint8_t value, uint8_t mode);
    
    /*!
     @function

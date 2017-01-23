@@ -121,7 +121,7 @@ public:
     @param      mode[in] DATA - write to the LCD CGRAM, COMMAND - write a 
     command to the LCD.
     */
-   virtual void send(uint8_t value, uint8_t mode);
+   virtual bool send(uint8_t value, uint8_t mode);
    
    /*!
     @function
@@ -179,7 +179,7 @@ private:
     @param      more[in]  Value to distinguish between command and data.
     COMMAND == command, DATA == data.
     */
-   void write4bits(uint8_t value, uint8_t mode);
+   bool write4bits(uint8_t value, uint8_t mode);
    
    /*!
     @method     
@@ -187,7 +187,7 @@ private:
     @discussion Sends a pulse of 1 uS to the Enable pin to execute an command
     or write operation.
     */
-   void pulseEnable(uint8_t);
+   bool pulseEnable(uint8_t);
    
    
    uint8_t _Addr;             // I2C Address of the IO expander

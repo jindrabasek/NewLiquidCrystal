@@ -119,7 +119,7 @@ LiquidCrystal::LiquidCrystal(uint8_t rs, uint8_t enable,
 /************ low level data pushing commands **********/
 //
 // send
-void LiquidCrystal::send(uint8_t value, uint8_t mode) 
+bool LiquidCrystal::send(uint8_t value, uint8_t mode)
 {
    // Only interested in COMMAND or DATA
    digitalWrite( _rs_pin, ( mode == DATA ) );
@@ -148,6 +148,8 @@ void LiquidCrystal::send(uint8_t value, uint8_t mode)
       writeNbits ( value, 4 );
    }
    waitUsec ( EXEC_TIME ); // wait for the command to execute by the LCD
+
+   return true;
 }
 
 //

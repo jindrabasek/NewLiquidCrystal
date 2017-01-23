@@ -159,7 +159,7 @@ LiquidCrystal_SR3W::LiquidCrystal_SR3W(uint8_t data, uint8_t clk, uint8_t strobe
 }
 
 
-void LiquidCrystal_SR3W::send(uint8_t value, uint8_t mode)
+bool LiquidCrystal_SR3W::send(uint8_t value, uint8_t mode)
 {
    
    if ( mode != FOUR_BITS )
@@ -176,6 +176,8 @@ void LiquidCrystal_SR3W::send(uint8_t value, uint8_t mode)
 #else
    delayMicroseconds ( 37 );      // commands & data writes need > 37us to complete
 #endif
+
+   return true;
 
 }
 

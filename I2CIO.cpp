@@ -42,6 +42,7 @@
 
 
 
+
 // CLASS VARIABLES
 // ---------------------------------------------------------------------------
 
@@ -64,6 +65,7 @@ I2CIO::I2CIO ( )
 // begin
 int I2CIO::begin (  uint8_t i2cAddr )
 {
+   PUSH_STACK(FILE_ID);
    _i2cAddr = i2cAddr;
    
    Wire.begin ( );
@@ -78,6 +80,7 @@ int I2CIO::begin (  uint8_t i2cAddr )
       _shadow = Wire.read (); // Remove the byte read don't need it.
 #endif
    }
+   POP_STACK;
    return ( _initialised );
 }
 
@@ -85,6 +88,7 @@ int I2CIO::begin (  uint8_t i2cAddr )
 // pinMode
 void I2CIO::pinMode ( uint8_t pin, uint8_t dir )
 {
+   PUSH_STACK(FILE_ID);
    if ( _initialised )
    {
       if ( OUTPUT == dir )
@@ -96,13 +100,14 @@ void I2CIO::pinMode ( uint8_t pin, uint8_t dir )
          _dirMask |= ( 1 << pin );
       }
    }
+   POP_STACK;
 }
 
 //
 // portMode
 void I2CIO::portMode ( uint8_t dir )
 {
-   
+   PUSH_STACK(FILE_ID);
    if ( _initialised )
    {
       if ( dir == INPUT )
@@ -114,24 +119,33 @@ void I2CIO::portMode ( uint8_t dir )
          _dirMask = 0x00;
       }
    }
+   POP_STACK;
 }
 
 //
 // read
 uint8_t I2CIO::read ( void )
 {
+   PUSH_STACK(FILE_ID);
    uint8_t retVal = 0;
    
    if ( _initialised )
    {
+       PUSH_STACK(FILE_ID);
       Wire.requestFrom ( _i2cAddr, (uint8_t)1 );
+      POP_STACK;
+      PUSH_STACK(FILE_ID);
 #if (ARDUINO <  100)
       retVal = ( _dirMask & Wire.receive ( ) );
 #else
       retVal = ( _dirMask & Wire.read ( ) );
-#endif      
+#endif
+      POP_STACK;
+      PUSH_STACK(FILE_ID);
       Wire.endTransmission();
+      POP_STACK;
    }
+   POP_STACK;
    return ( retVal );
 }
 
@@ -139,6 +153,7 @@ uint8_t I2CIO::read ( void )
 // write
 int I2CIO::write ( uint8_t value )
 {
+   PUSH_STACK(FILE_ID);
    int status = 0;
    
    if ( _initialised )
@@ -146,15 +161,21 @@ int I2CIO::write ( uint8_t value )
       // Only write HIGH the values of the ports that have been initialised as
       // outputs updating the output shadow of the device
       _shadow = ( value & ~(_dirMask) );
-   
+      PUSH_STACK(FILE_ID);
       Wire.beginTransmission ( _i2cAddr );
+      POP_STACK;
+      PUSH_STACK(FILE_ID);
 #if (ARDUINO <  100)
       Wire.send ( _shadow );
 #else
       Wire.write ( _shadow );
 #endif  
+      POP_STACK;
+      PUSH_STACK(FILE_ID);
       status = Wire.endTransmission ();
+      POP_STACK;
    }
+   POP_STACK;
    return ( (status == 0) );
 }
 
@@ -162,6 +183,7 @@ int I2CIO::write ( uint8_t value )
 // digitalRead
 uint8_t I2CIO::digitalRead ( uint8_t pin )
 {
+   PUSH_STACK(FILE_ID);
    uint8_t pinVal = 0;
    
    // Check if initialised and that the pin is within range of the device
@@ -172,6 +194,7 @@ uint8_t I2CIO::digitalRead ( uint8_t pin )
       pinVal = this->read() & _dirMask;
       pinVal = ( pinVal >> pin ) & 0x01; // Get the pin value
    }
+   POP_STACK;
    return (pinVal);
 }
 
@@ -179,6 +202,7 @@ uint8_t I2CIO::digitalRead ( uint8_t pin )
 // digitalWrite
 int I2CIO::digitalWrite ( uint8_t pin, uint8_t level )
 {
+   PUSH_STACK(FILE_ID);
    uint8_t writeVal;
    int status = 0;
    
@@ -200,6 +224,7 @@ int I2CIO::digitalWrite ( uint8_t pin, uint8_t level )
       }
       status = this->write ( _shadow );
    }
+   POP_STACK;
    return ( status );
 }
 
@@ -210,8 +235,13 @@ bool I2CIO::isAvailable (uint8_t i2cAddr)
 {
    int error;
    
+   PUSH_STACK(FILE_ID);
    Wire.beginTransmission( i2cAddr );
+   POP_STACK;
+   PUSH_STACK(FILE_ID);
    error = Wire.endTransmission();
+   POP_STACK;
+
    if (error==0)
    {
      return true;
