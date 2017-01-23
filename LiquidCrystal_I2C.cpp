@@ -36,6 +36,8 @@
 #include "I2CIO.h"
 #include "LiquidCrystal_I2C.h"
 
+
+
 // CONSTANT  definitions
 // ---------------------------------------------------------------------------
 
@@ -143,9 +145,8 @@ LiquidCrystal_I2C::LiquidCrystal_I2C(uint8_t lcd_Addr, uint8_t En, uint8_t Rw,
 // begin
 void LiquidCrystal_I2C::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) 
 {
-   
    init();     // Initialise the I2C expander interface
-   LCD::begin ( cols, lines, dotsize );   
+   LCD::begin ( cols, lines, dotsize );
 }
 
 
@@ -227,7 +228,7 @@ void LiquidCrystal_I2C::config (uint8_t lcd_Addr, uint8_t En, uint8_t Rw, uint8_
    _data_pins[0] = ( 1 << d4 );
    _data_pins[1] = ( 1 << d5 );
    _data_pins[2] = ( 1 << d6 );
-   _data_pins[3] = ( 1 << d7 );   
+   _data_pins[3] = ( 1 << d7 );
 }
 
 
@@ -237,26 +238,29 @@ void LiquidCrystal_I2C::config (uint8_t lcd_Addr, uint8_t En, uint8_t Rw, uint8_
 
 //
 // send - write either command or data
-void LiquidCrystal_I2C::send(uint8_t value, uint8_t mode) 
+bool LiquidCrystal_I2C::send(uint8_t value, uint8_t mode)
 {
    // No need to use the delay routines since the time taken to write takes
    // longer that what is needed both for toggling and enable pin an to execute
    // the command.
    
+   bool result = true;
+
    if ( mode == FOUR_BITS )
    {
-      write4bits( (value & 0x0F), COMMAND );
+      result = write4bits( (value & 0x0F), COMMAND );
    }
    else 
    {
-      write4bits( (value >> 4), mode );
-      write4bits( (value & 0x0F), mode);
+      result = write4bits((value >> 4), mode);
+      result &= write4bits((value & 0x0F), mode);
    }
+   return result;
 }
 
 //
 // write4bits
-void LiquidCrystal_I2C::write4bits ( uint8_t value, uint8_t mode ) 
+bool LiquidCrystal_I2C::write4bits ( uint8_t value, uint8_t mode )
 {
    uint8_t pinMapValue = 0;
    
@@ -279,13 +283,17 @@ void LiquidCrystal_I2C::write4bits ( uint8_t value, uint8_t mode )
    }
    
    pinMapValue |= mode | _backlightStsMask;
-   pulseEnable ( pinMapValue );
+   bool result = pulseEnable ( pinMapValue );
+   return result;
 }
 
 //
 // pulseEnable
-void LiquidCrystal_I2C::pulseEnable (uint8_t data)
+bool LiquidCrystal_I2C::pulseEnable (uint8_t data)
 {
-   _i2cio.write (data | _En);   // En HIGH
-   _i2cio.write (data & ~_En);  // En LOW
+   bool result = _i2cio.write (data | _En);   // En HIGH
+   if (result) {
+       result &= _i2cio.write (data & ~_En);  // En LOW
+   }
+   return result;
 }

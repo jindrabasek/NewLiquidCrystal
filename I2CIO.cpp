@@ -42,6 +42,7 @@
 
 
 
+
 // CLASS VARIABLES
 // ---------------------------------------------------------------------------
 
@@ -102,7 +103,6 @@ void I2CIO::pinMode ( uint8_t pin, uint8_t dir )
 // portMode
 void I2CIO::portMode ( uint8_t dir )
 {
-   
    if ( _initialised )
    {
       if ( dir == INPUT )
@@ -129,7 +129,7 @@ uint8_t I2CIO::read ( void )
       retVal = ( _dirMask & Wire.receive ( ) );
 #else
       retVal = ( _dirMask & Wire.read ( ) );
-#endif      
+#endif
       Wire.endTransmission();
    }
    return ( retVal );
@@ -146,13 +146,12 @@ int I2CIO::write ( uint8_t value )
       // Only write HIGH the values of the ports that have been initialised as
       // outputs updating the output shadow of the device
       _shadow = ( value & ~(_dirMask) );
-   
       Wire.beginTransmission ( _i2cAddr );
 #if (ARDUINO <  100)
       Wire.send ( _shadow );
 #else
       Wire.write ( _shadow );
-#endif  
+#endif
       status = Wire.endTransmission ();
    }
    return ( (status == 0) );
@@ -212,6 +211,7 @@ bool I2CIO::isAvailable (uint8_t i2cAddr)
    
    Wire.beginTransmission( i2cAddr );
    error = Wire.endTransmission();
+
    if (error==0)
    {
      return true;

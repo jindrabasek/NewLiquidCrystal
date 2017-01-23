@@ -328,7 +328,7 @@ public:
     @param      mode[in]  DATA=8bit data, COMMAND=8bit cmd, FOUR_BITS=4bit cmd
     the LCD.
     */
-   virtual void send(uint8_t value, uint8_t mode);
+   virtual bool send(uint8_t value, uint8_t mode);
    
    
    /*!

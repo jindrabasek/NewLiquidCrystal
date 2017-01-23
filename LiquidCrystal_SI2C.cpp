@@ -240,7 +240,7 @@ void LiquidCrystal_SI2C::config (uint8_t lcd_Addr, uint8_t En, uint8_t Rw, uint8
 
 //
 // send - write either command or data
-void LiquidCrystal_SI2C::send(uint8_t value, uint8_t mode) 
+bool LiquidCrystal_SI2C::send(uint8_t value, uint8_t mode)
 {
    // No need to use the delay routines since the time taken to write takes
    // longer that what is needed both for toggling and enable pin an to execute
@@ -248,18 +248,18 @@ void LiquidCrystal_SI2C::send(uint8_t value, uint8_t mode)
    
    if ( mode == FOUR_BITS )
    {
-      write4bits( (value & 0x0F), COMMAND );
+      return write4bits( (value & 0x0F), COMMAND );
    }
    else 
    {
-      write4bits( (value >> 4), mode );
+      return write4bits( (value >> 4), mode ) &&
       write4bits( (value & 0x0F), mode);
    }
 }
 
 //
 // write4bits
-void LiquidCrystal_SI2C::write4bits ( uint8_t value, uint8_t mode ) 
+bool LiquidCrystal_SI2C::write4bits ( uint8_t value, uint8_t mode )
 {
    uint8_t pinMapValue = 0;
    
@@ -282,13 +282,13 @@ void LiquidCrystal_SI2C::write4bits ( uint8_t value, uint8_t mode )
    }
    
    pinMapValue |= mode | _backlightStsMask;
-   pulseEnable ( pinMapValue );
+   return pulseEnable ( pinMapValue );
 }
 
 //
 // pulseEnable
-void LiquidCrystal_SI2C::pulseEnable (uint8_t data)
+bool LiquidCrystal_SI2C::pulseEnable (uint8_t data)
 {
-   _si2cio.write (data | _En);   // En HIGH
+   return _si2cio.write (data | _En) &&   // En HIGH
    _si2cio.write (data & ~_En);  // En LOW
 }

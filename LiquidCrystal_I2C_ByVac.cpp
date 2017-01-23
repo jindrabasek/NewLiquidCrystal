@@ -96,10 +96,10 @@ int LiquidCrystal_I2C_ByVac::init()
 
 //
 // send - write either command or data
-void LiquidCrystal_I2C_ByVac::send(uint8_t value, uint8_t mode) 
+bool LiquidCrystal_I2C_ByVac::send(uint8_t value, uint8_t mode)
 {
   Wire.beginTransmission(_Addr);
   Wire.write(mode+1); // map COMMAND (0) -> ByVac command code 0x01/ DATA  (1) ->  ByVac command code 0x02
   Wire.write(value);
-  Wire.endTransmission();
+  return Wire.endTransmission() == 0;
 }

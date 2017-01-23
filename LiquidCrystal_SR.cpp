@@ -169,7 +169,7 @@ void LiquidCrystal_SR::shiftIt(uint8_t val)
 /************ low level data pushing commands **********/
 //
 // send
-void LiquidCrystal_SR::send(uint8_t value, uint8_t mode)
+bool LiquidCrystal_SR::send(uint8_t value, uint8_t mode)
 {
    // Divide byte in two nibbles include the RS signal
    // and format it for shiftregister output wiring to the LCD
@@ -194,6 +194,8 @@ void LiquidCrystal_SR::send(uint8_t value, uint8_t mode)
 #else
    delayMicroseconds ( 37 );      // commands & data writes need > 37us to complete
 #endif
+
+   return true;
 
 }
 

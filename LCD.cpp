@@ -110,15 +110,15 @@ void LCD::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
       // Special case of "Function Set"
       send(0x03, FOUR_BITS);
       delayMicroseconds(4500); // wait min 4.1ms
-      
+
       // second try
       send ( 0x03, FOUR_BITS );
       delayMicroseconds(150); // wait min 100us
-      
+
       // third go!
       send( 0x03, FOUR_BITS );
       delayMicroseconds(150); // wait min of 100us
-      
+
       // finally, set to 4-bit interface
       send ( 0x02, FOUR_BITS );
       delayMicroseconds(150); // wait min of 100us
@@ -132,11 +132,11 @@ void LCD::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
       // Send function set command sequence
       command(LCD_FUNCTIONSET | _displayfunction);
       delayMicroseconds(4500);  // wait more than 4.1ms
-      
+
       // second try
       command(LCD_FUNCTIONSET | _displayfunction);
       delayMicroseconds(150);
-      
+
       // third go
       command(LCD_FUNCTIONSET | _displayfunction);
       delayMicroseconds(150);
@@ -160,7 +160,6 @@ void LCD::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
    command(LCD_ENTRYMODESET | _displaymode);
 
    backlight();
-
 }
 
 // Common LCD Commands
@@ -197,7 +196,6 @@ void LCD::setCursor(uint8_t col, uint8_t row)
    {
       command(LCD_SETDDRAMADDR | (col + row_offsetsDef[row]));
    }
-   
 }
 
 // Turn the display on/off
@@ -366,7 +364,6 @@ void LCD::write(uint8_t value)
 #else
 size_t LCD::write(uint8_t value) 
 {
-   send(value, DATA);
-   return 1;             // assume OK
+   return send(value, DATA);
 }
 #endif
