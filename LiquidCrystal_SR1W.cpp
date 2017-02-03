@@ -32,6 +32,7 @@
 // @author  S. Erisman - arduino@serisman.com
 // ---------------------------------------------------------------------------
 
+#if defined (__AVR__)
 #include "LiquidCrystal_SR1W.h"
 
 // CONSTRUCTORS
@@ -200,7 +201,7 @@ bool LiquidCrystal_SR1W::send(uint8_t value, uint8_t mode)
 	if ( mode != FOUR_BITS )
 	{
 		// upper nibble
-		data = ( mode == DATA ) ? SR1W_RS_MASK : 0;
+		data = ( mode == LCD_DATA ) ? SR1W_RS_MASK : 0;
 		data |= SR1W_EN_MASK | SR1W_UNUSED_MASK;
 		data |= _blMask;
       
@@ -213,7 +214,7 @@ bool LiquidCrystal_SR1W::send(uint8_t value, uint8_t mode)
 	}
    
 	// lower nibble
-	data = ( mode == DATA ) ? SR1W_RS_MASK : 0;
+	data = ( mode == LCD_DATA ) ? SR1W_RS_MASK : 0;
 	data |= SR1W_EN_MASK | SR1W_UNUSED_MASK;
 	data |= _blMask;
    
@@ -252,3 +253,4 @@ void LiquidCrystal_SR1W::setBacklight ( uint8_t value )
 	// The seems to be safe because the LCD appears to treat this as a NOP.
 	send(0, COMMAND);
 }
+#endif // defined (__AVR__)

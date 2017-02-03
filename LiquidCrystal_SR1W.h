@@ -1,4 +1,4 @@
-/*
+
 // ---------------------------------------------------------------------------
 // Created/Adapted by Stephen Erisman 2013-07-06
 // Copyright 2013 - Under creative commons license 3.0:
@@ -257,16 +257,17 @@
 // 2013.07.07 serisman - major speed optimization
 // 2013.07.06 serisman - created/modified from SR2W source to create SR1W
 // @author  S. Erisman - arduino@serisman.com
-// --------------------------------------------------------------------------------*/
+// --------------------------------------------------------------------------------
 
 #ifndef _LIQUIDCRYSTAL_SR1W_
 #define _LIQUIDCRYSTAL_SR1W_
+
+#if defined (__AVR__)
 
 #include <inttypes.h>
 #include "LCD.h"
 #include "FastIO.h"
 
-/*
 // 1-wire SR timing constants
 // ---------------------------------------------------------------------------
 
@@ -274,7 +275,7 @@
 //  The 1.5k resistor (1.2k - 1.8k with a 20% tolerance)
 //   takes between 2.376uS and 4.36uS to fully charge or discharge
 //	 the 2.2n capacitor (1.98n - 2.42n with a 10% tolerance).
-//	We round this up to a 5uS delay to provide an additional safety margin.*/
+//	We round this up to a 5uS delay to provide an additional safety margin.
 
 #define SR1W_DELAY_US		5
 #define SR1W_DELAY()		{ delayMicroseconds(SR1W_DELAY_US); numDelays++; }
@@ -373,4 +374,9 @@ private:
    uint8_t _blPolarity;
    uint8_t _blMask;
 };
+
+#else
+#error "ONLY SUPPORTED ON AVR PROCESSORS"
+#endif // defined (__AVR__)
+
 #endif

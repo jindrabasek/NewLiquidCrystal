@@ -30,6 +30,9 @@
 // @author F. Malpartida - fmalpartida@gmail.com
 // Adapted to SoftIC2 by Adrian Piccioli - adrianpiccioli@gmail.com
 // ---------------------------------------------------------------------------
+
+#if defined (__AVR__)
+
 #if (ARDUINO <  100)
 #include <WProgram.h>
 #else
@@ -276,7 +279,7 @@ bool LiquidCrystal_SI2C::write4bits ( uint8_t value, uint8_t mode )
    
    // Is it a command or data
    // -----------------------
-   if ( mode == DATA )
+   if ( mode == LCD_DATA )
    {
       mode = _Rs;
    }
@@ -292,3 +295,5 @@ bool LiquidCrystal_SI2C::pulseEnable (uint8_t data)
    return _si2cio.write (data | _En) &&   // En HIGH
    _si2cio.write (data & ~_En);  // En LOW
 }
+
+#endif // defined (__AVR__)

@@ -36,8 +36,6 @@
 #include "I2CIO.h"
 #include "LiquidCrystal_I2C.h"
 
-
-
 // CONSTANT  definitions
 // ---------------------------------------------------------------------------
 
@@ -277,14 +275,13 @@ bool LiquidCrystal_I2C::write4bits ( uint8_t value, uint8_t mode )
    
    // Is it a command or data
    // -----------------------
-   if ( mode == DATA )
+   if ( mode == LCD_DATA )
    {
       mode = _Rs;
    }
    
    pinMapValue |= mode | _backlightStsMask;
-   bool result = pulseEnable ( pinMapValue );
-   return result;
+   return pulseEnable ( pinMapValue );
 }
 
 //

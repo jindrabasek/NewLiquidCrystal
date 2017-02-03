@@ -110,15 +110,15 @@ void LCD::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
       // Special case of "Function Set"
       send(0x03, FOUR_BITS);
       delayMicroseconds(4500); // wait min 4.1ms
-
+      
       // second try
       send ( 0x03, FOUR_BITS );
       delayMicroseconds(150); // wait min 100us
-
+      
       // third go!
       send( 0x03, FOUR_BITS );
       delayMicroseconds(150); // wait min of 100us
-
+      
       // finally, set to 4-bit interface
       send ( 0x02, FOUR_BITS );
       delayMicroseconds(150); // wait min of 100us
@@ -132,11 +132,11 @@ void LCD::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
       // Send function set command sequence
       command(LCD_FUNCTIONSET | _displayfunction);
       delayMicroseconds(4500);  // wait more than 4.1ms
-
+      
       // second try
       command(LCD_FUNCTIONSET | _displayfunction);
       delayMicroseconds(150);
-
+      
       // third go
       command(LCD_FUNCTIONSET | _displayfunction);
       delayMicroseconds(150);
@@ -160,6 +160,7 @@ void LCD::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
    command(LCD_ENTRYMODESET | _displaymode);
 
    backlight();
+
 }
 
 // Common LCD Commands
@@ -359,11 +360,11 @@ void LCD::command(uint8_t value)
 #if (ARDUINO <  100)
 void LCD::write(uint8_t value)
 {
-   send(value, DATA);
+   send(value, LCD_DATA);
 }
 #else
 size_t LCD::write(uint8_t value) 
 {
-   return send(value, DATA);
+   return send(value, LCD_DATA);
 }
 #endif
